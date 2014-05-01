@@ -11,7 +11,7 @@ The template pattern is used to allow users of this mapping to provide their own
  - how to build the final payload to the receiving system (e.g. add the session key to a field, heafer field, asma, etc).
 
 Example implementations provided:
- - SessionMessageIdentityImpl [simply copy the input payload to the output and log the determined session key]
+ - SessionMessageIdentityImpl [simply copy the input payload to the output and log the determined session key - used for testing]
  - SessionMessagePayloadImpl [copy input payload to output and insert the session key into a specified field]
  - SessionMessageAddToPayloadImpl [copy input payload to output and add a new payload field for the session key]
  - SessionMessageSoapHeaderImpl [copy input payload to output and add a soap header field for the session key]
@@ -27,3 +27,6 @@ The PI operation mapping references the java class inside the imported archive. 
  - MAPPING_TYPE [Used to determine which implementation to use - handled by the Abstract Factory]
  - DC_NAMESPACE [Dynamic Configuration Namespace - used by the ASMA implementation]
  - DC_NAME [Dynamic Configuration Name - used by the ASMA implementation].
+
+=== Contributions ===
+Please ensure that any code changes or additional temnplate pattern implementations are covered by unit tests. This project uses JUnit and Mockito.
