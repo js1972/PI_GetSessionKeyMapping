@@ -28,5 +28,7 @@ The PI operation mapping references the java class inside the imported archive. 
  - DC_NAMESPACE [Dynamic Configuration Namespace - used by the ASMA implementation]
  - DC_NAME [Dynamic Configuration Name - used by the ASMA implementation].
 
-=== Contributions ===
+
+=== Contributions
+
 Please ensure that any code changes or additional temnplate pattern implementations are covered by unit tests. This project uses JUnit and Mockito.
