@@ -21,7 +21,7 @@ The template pattern is used to allow users of this mapping to provide their own
 ### Notes
 The SOAP Header implementation requires the PI SOAP channel to be run in NOSOAP mode.
 The ASMA implementation allows you to use the AXIS receiver adapter for your message and insert the Dynamic Configuration attribute into the HTTP header (e.g. a cookie).
-Explanation of scenation on Evernote: https://www.evernote.com/shard/s4/sh/407418fc-0dd8-4b89-9f55-308d9820093c/f821979213af65d7dc7426fc2b708edd
+For a detailed walk-through of this solution on Evernote: https://www.evernote.com/shard/s4/sh/407418fc-0dd8-4b89-9f55-308d9820093c/f821979213af65d7dc7426fc2b708edd
 
 ### Configuration in PI
 This mapping is loaded into PI as Imported Archive.
