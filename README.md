@@ -9,7 +9,7 @@ An abstract factory is used to create the required implementation.
 The template pattern is used to allow users of this mapping to provide their own logic to specify:
  - the payload of the session key request message
  - how to extract the session key from the response message
- - how to build the final payload to the receiving system (e.g. add the session key to a field, heafer field, asma, etc).
+ - how to build the final payload to the receiving system (e.g. add the session key to a field, header field, asma, etc).
 
 ### Example implementations provided
  - SessionMessageIdentityImpl [simply copy the input payload to the output and log the determined session key - used for testing]
