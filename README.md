@@ -34,4 +34,4 @@ The PI operation mapping references the java class inside the imported archive. 
 
 
 ### Contributions
-Please ensure that any code changes or additional temnplate pattern implementations are covered by unit tests. This project uses JUnit and Mockito.
+Please ensure that any code changes or additional template pattern implementations are covered by unit tests. This project uses JUnit and Mockito.
