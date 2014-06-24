@@ -34,7 +34,7 @@ The PI operation mapping references the java class inside the imported archive. 
  - FIELD\_NAME [This is used in building the request message to the receiving system. For the SET\_FIELD scenario it specifies the field which is set with the session key. For the ADD_FIELD scenario it is used to specify a field at the same node-level where you would like the new field added.]
  - NEW\_SESSIONID\_FIELD\_NAME [Specifies the new field name in the ADD\_FIELD scenario. It is placed at the same node level as the FIELD\_NAME element.]
  - SESSION\_KEY\_RESPONSE\_FIELD [Mandatory - This is the name of the field in the session key web service response that contains the actual session key.]
- - SOAP\_HEADER\_NODE [This is used in the SessionMessageSoapHeaderImpl to specify the field names in the soap header as follows: <SOAP\_HEADER\_NODE><FIELD\NAME>--sessionkey--</FIELD\_NAME></SOAP\_HEADER\_NODE>]
+ - SOAP\_HEADER\_NODE [This is used in the SessionMessageSoapHeaderImpl to specify the field names in the soap header as follows: \<SOAP\_HEADER\_NODE\>\<FIELD\_NAME\>--sessionkey--\</FIELD\_NAME\>\</SOAP\_HEADER\_NODE\>]
 
 
 ### Contributions
