@@ -22,19 +22,14 @@ public class CommunicationChannelImpl implements CommunicationChannel {
 	}
 
 	@Override
-	public Payload call(Payload request) {
+	public Payload call(Payload request) throws LookupException {
 		SystemAccessor accessor = null;
 		Payload response = null;
-		
-		try {
-			Channel piChannel = LookupService.getChannel(businessComponent, channelName);
-			accessor = LookupService.getSystemAccessor(piChannel);
-			response = accessor.call(request);
-			
-		} catch (LookupException e) {
-			e.printStackTrace();
-		}
-		
+
+		Channel piChannel = LookupService.getChannel(businessComponent, channelName);
+		accessor = LookupService.getSystemAccessor(piChannel);
+		response = accessor.call(request);
+
 		return response;
 	}
 

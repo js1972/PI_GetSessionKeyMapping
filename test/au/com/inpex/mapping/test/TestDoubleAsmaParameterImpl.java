@@ -6,12 +6,12 @@ public class TestDoubleAsmaParameterImpl implements AsmaParameter {
 	String asma = "";
 	
 	@Override
-	public String get() {
+	public String get(String key) {
 		return asma;
 	}
 
 	@Override
-	public void set(String value) {
+	public void set(String key, String value) {
 		asma = value;
 	}
 

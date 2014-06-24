@@ -7,6 +7,7 @@ import com.sap.aii.mapping.api.TransformationOutput;
 public interface SessionMessageFactory {
 	public SessionMessage createSessionMessageHandler(
 		String type,
+		Boolean logoff,
 		TransformationInput in,
 		TransformationOutput out,
 		CommunicationChannel cc,

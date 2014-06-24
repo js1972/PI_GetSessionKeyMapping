@@ -8,12 +8,13 @@ import java.io.Reader;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+
+import au.com.inpex.mapping.exceptions.BuildMessagePayloadException;
+import au.com.inpex.mapping.exceptions.SessionKeyResponseException;
 
 import com.sap.aii.mapping.api.AbstractTrace;
 import com.sap.aii.mapping.api.TransformationInput;
@@ -22,6 +23,18 @@ import com.sap.aii.mapping.lookup.LookupService;
 import com.sap.aii.mapping.lookup.Payload;
 
 
+/**
+ * Copy the input to the output and wrap in a soap header with the session key.
+ * The soap header fields are defined by variables node and fieldName. These are
+ * extracted from PI mapping parameters and are used as follows:
+ * 
+ * <node><fieldName>---sessionkey---</fieldName></node>
+ * 
+ * This scenario requires the receiver adapter to be in nosoap mode to allow us
+ * manually construct the soap header. You cannot alter the soap header
+ * otherwise.
+ * 
+ */
 public class SessionMessageSoapHeaderImpl extends SessionMessage {
 	private String prefix = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 		+ "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:urn=\"urn:pi:session:key\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
@@ -29,9 +42,12 @@ public class SessionMessageSoapHeaderImpl extends SessionMessage {
 	private String suffix = "</urn:sessionId></urn:SessionHeader></soapenv:Header><soapenv:Body>";
 	private String envelope = "</soapenv:Body></soapenv:Envelope>";
 	
+	private String node = "";
 	
-	SessionMessageSoapHeaderImpl(TransformationInput in, TransformationOutput out, CommunicationChannel cc, AbstractTrace trace) {
-		super(in, out, cc, trace);
+	
+	SessionMessageSoapHeaderImpl(TransformationInput in, TransformationOutput out, CommunicationChannel cc, AsmaParameter dc, AbstractTrace trace) {
+		super(in, out, cc, dc, trace);
+		node = in.getInputParameters().getString("SOAP_HEADER_NODE");
 	}
 	
 	@Override
@@ -44,7 +60,7 @@ public class SessionMessageSoapHeaderImpl extends SessionMessage {
 			DocumentBuilder builder = docFactory.newDocumentBuilder();
 			Document document;
 			document = builder.parse(is);
-			NodeList nodes = document.getElementsByTagName("key");
+			NodeList nodes = document.getElementsByTagName(sessionKeyResponseField);
 			Node node = nodes.item(0);
 			
 			if (node != null) {
@@ -54,12 +70,8 @@ public class SessionMessageSoapHeaderImpl extends SessionMessage {
 				}
 			}
 			
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			throw new SessionKeyResponseException(e.getMessage());
 		}
 		
 		return sessionId;
@@ -67,7 +79,7 @@ public class SessionMessageSoapHeaderImpl extends SessionMessage {
 
 	@Override
 	protected Payload setRequestPayload() {
-		String loginXml = "<SessionKeyRequest xmlns=\"urn:pi:session:key\"><data>abc 123</data></SessionKeyRequest>";
+		String loginXml = "<SessionKeyRequest xmlns=\"urn:pi:session:key\"><data>session key request from soap-header handler</data></SessionKeyRequest>";
 		InputStream is = new ByteArrayInputStream(loginXml.getBytes());
 		Payload payload = LookupService.getXmlPayload(is);
 		
@@ -80,9 +92,7 @@ public class SessionMessageSoapHeaderImpl extends SessionMessage {
 	 * Note: requires comm.channel to be in 'nosoap' mode.
 	 */
 	@Override
-	protected void buildMessage(String sessionId) {
-		logInfo("Building message with sessionId: " + sessionId);
-		
+	protected void buildMessage(String sessionId) {		
 		try {
 			char[] buffer = new char[100];
 			StringBuilder str = new StringBuilder();
@@ -109,10 +119,10 @@ public class SessionMessageSoapHeaderImpl extends SessionMessage {
 				}
 			}
 			
-			logInfo(str.toString());
-			
 			// wrap payload in soap envelope/header
-
+			prefix.replaceAll("SessionHeader", node);
+			prefix.replaceAll("sessionId", fieldName);
+			
 			messageOutputStream.write(prefix.getBytes());
 			messageOutputStream.write(sessionId.getBytes());
 			messageOutputStream.write(suffix.getBytes());
@@ -120,7 +130,7 @@ public class SessionMessageSoapHeaderImpl extends SessionMessage {
 			messageOutputStream.write(envelope.getBytes());
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new BuildMessagePayloadException(e.getMessage());
 		}
 	}
 

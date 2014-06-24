@@ -7,14 +7,14 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import au.com.inpex.mapping.exceptions.SessionKeyResponseException;
+//import javax.xml.parsers.DocumentBuilder;
+//import javax.xml.parsers.DocumentBuilderFactory;
+//
+//import org.w3c.dom.Document;
+//import org.w3c.dom.Node;
+//import org.w3c.dom.NodeList;
+//
+//import au.com.inpex.mapping.exceptions.SessionKeyResponseException;
 
 import com.sap.aii.mapping.api.AbstractTrace;
 import com.sap.aii.mapping.api.TransformationInput;
@@ -28,40 +28,45 @@ import com.sap.aii.mapping.lookup.Payload;
  * payload.
  *
  */
-public class SessionMessageIdentityImpl extends SessionMessage {
-	SessionMessageIdentityImpl(TransformationInput in, TransformationOutput out, CommunicationChannel cc, AsmaParameter dc, AbstractTrace trace) {
+public class LogoffHandlerImpl extends SessionMessage {
+	private AsmaParameter dynConfig = null;
+	
+	LogoffHandlerImpl(TransformationInput in, TransformationOutput out, CommunicationChannel cc, AsmaParameter dc, AbstractTrace trace) {
 		super(in, out, cc, dc, trace);
+		dynConfig = dc;
 	}
 
 	@Override
 	protected String getSessionKeyFromResponse(Payload response) {
-		String sessionId = null;
-		
-		InputStream is = response.getContent();
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		try {
-			DocumentBuilder builder = docFactory.newDocumentBuilder();
-			Document document = builder.parse(is);
-			NodeList nodes = document.getElementsByTagName(sessionKeyResponseField);
-			Node node = nodes.item(0);
-			
-			if (node != null) {
-				node = node.getFirstChild();
-				if (node != null) {
-					sessionId = node.getNodeValue();
-				}
-			}
-			
-		} catch (Exception e) {
-			throw new SessionKeyResponseException(e.getMessage());
-		}
-		
-		return sessionId;
+		return null;
+//		String sessionId = null;
+//		
+//		InputStream is = response.getContent();
+//		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+//		try {
+//			DocumentBuilder builder = docFactory.newDocumentBuilder();
+//			Document document = builder.parse(is);
+//			NodeList nodes = document.getElementsByTagName("key");
+//			Node node = nodes.item(0);
+//			
+//			if (node != null) {
+//				node = node.getFirstChild();
+//				if (node != null) {
+//					sessionId = node.getNodeValue();
+//				}
+//			}
+//			
+//		} catch (Exception e) {
+//			throw new SessionKeyResponseException(e.getMessage());
+//		}
+//		
+//		return sessionId;
 	}
 
 	@Override
 	protected Payload setRequestPayload() {
-		String loginXml = "<SessionKeyRequest xmlns=\"urn:pi:session:key\"><data>session key request from identity handler</data></SessionKeyRequest>";
+		String sessionId = dynConfig.get("sessionId");
+		String loginXml = "<SessionKeyRequest xmlns=\"urn:pi:session:key\"><data>LOGOFF NOW FROM SESSION ID: " + sessionId + "!</data></SessionKeyRequest>";
 		InputStream is = new ByteArrayInputStream(loginXml.getBytes());
 		Payload payload = LookupService.getXmlPayload(is);
 		
@@ -99,8 +104,5 @@ public class SessionMessageIdentityImpl extends SessionMessage {
 		
 		PrintStream ps = new PrintStream(messageOutputStream);
 		ps.print(str.toString());
-		
-		logInfo("Session Id: " + sessionId);
 	}
-
 }

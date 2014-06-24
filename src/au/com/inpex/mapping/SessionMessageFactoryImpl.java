@@ -6,8 +6,10 @@ import com.sap.aii.mapping.api.TransformationOutput;
 
 
 /**
- * Implementation of Abstract Factory pattern for SessionMessage objects.
- *
+ * Implementation of a Simple Factory for SessionMessage objects.
+ * 
+ * Note: The default implementation is the identity transform which only
+ * logs the session key and does nothing to the payload.
  */
 public class SessionMessageFactoryImpl implements SessionMessageFactory {
 	private static SessionMessageFactoryImpl instance;
@@ -23,22 +25,29 @@ public class SessionMessageFactoryImpl implements SessionMessageFactory {
 	@Override
 	public SessionMessage createSessionMessageHandler(
 		String type,
+		Boolean logoff,
 		TransformationInput in,
 		TransformationOutput out,
 		CommunicationChannel cc,
 		AsmaParameter dynConfig,
 		AbstractTrace trace) {
 		
-		if (type.equals("SET_FIELD")) {
-			return new SessionMessagePayloadImpl(in, out, cc, trace);
+		//
+		// To logoff we set the mapping parameter binding  for LOGGOFF = TRUE
+		// and DO NOT bind the mapping type. This is how we can differentiate
+		// between the request and the response.
+		//
+		
+		if (logoff) {
+			return new LogoffHandlerImpl(in, out, cc, dynConfig, trace);
+		} else if (type.equals("SET_FIELD")) {
+			return new SessionMessagePayloadImpl(in, out, cc, dynConfig, trace);
 		} else if (type.equals("ADD_FIELD")) {
-			return new SessionMessageAddToPayloadImpl(in, out, cc, trace);
+			return new SessionMessageAddToPayloadImpl(in, out, cc, dynConfig, trace);
 		} else if (type.equals("SOAP_HEADER")) {
-			return new SessionMessageSoapHeaderImpl(in, out, cc, trace);
-		} else if (type.equals("ASMA")) {
-			return new SessionMessageASMAImpl(in, out, cc, dynConfig, trace);
+			return new SessionMessageSoapHeaderImpl(in, out, cc, dynConfig, trace);
 		} else {
-			return new SessionMessageIdentityImpl(in, out, cc, trace);
+			return new SessionMessageIdentityImpl(in, out, cc, dynConfig, trace);
 		}
 	}
 

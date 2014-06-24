@@ -18,8 +18,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import au.com.inpex.mapping.AsmaParameter;
 import au.com.inpex.mapping.CommunicationChannel;
 import au.com.inpex.mapping.SessionMessage;
+import au.com.inpex.mapping.SessionMessageAddToPayloadImpl;
 import au.com.inpex.mapping.SessionMessageFactory;
 import au.com.inpex.mapping.SessionMessageFactoryImpl;
+import au.com.inpex.mapping.SessionMessageIdentityImpl;
+import au.com.inpex.mapping.SessionMessagePayloadImpl;
+import au.com.inpex.mapping.SessionMessageSoapHeaderImpl;
 
 import com.sap.aii.mapping.api.AbstractTrace;
 import com.sap.aii.mapping.api.InputParameters;
@@ -28,6 +32,7 @@ import com.sap.aii.mapping.api.OutputPayload;
 import com.sap.aii.mapping.api.TransformationInput;
 import com.sap.aii.mapping.api.TransformationOutput;
 import com.sap.aii.mapping.lookup.Channel;
+import com.sap.aii.mapping.lookup.LookupException;
 
 
 /**
@@ -111,13 +116,15 @@ public class TestSessionMessage {
 	}
 
 	@Test
-	public void testProcessWithIdentityImpl() {
+	public void testProcessWithIdentityImpl() throws LookupException {
 		CommunicationChannel cc = new TestDoubleCommunicationChannelImpl("BC_Jason", "GetSessionKey_BasicAuth_R_SOAP");
 		AsmaParameter asma = new TestDoubleAsmaParameterImpl();
 		
 		SessionMessageFactoryImpl smf = SessionMessageFactoryImpl.getInstance();
-		sessionMessageHandler = smf.createSessionMessageHandler("", inMock, outMock, cc, asma, traceMock);
+		sessionMessageHandler = smf.createSessionMessageHandler("", false, inMock, outMock, cc, asma, traceMock);
 		sessionMessageHandler.process();
+		
+		assertEquals(SessionMessageIdentityImpl.class, sessionMessageHandler.getClass());
 		
 		String output = outputPayload.getOutputStream().toString();
 		assertEquals("<input><id></id><dummy>hello!</dummy></input>", output);
@@ -126,56 +133,47 @@ public class TestSessionMessage {
 	}
 	
 	@Test
-	public void testProcessWithIdentityAddToPayloadImpl() {
+	public void testProcessWithIdentityAddToPayloadImpl() throws LookupException {
 		CommunicationChannel cc = new TestDoubleCommunicationChannelImpl("BC_Jason", "GetSessionKey_BasicAuth_R_SOAP");
 		AsmaParameter asma = new TestDoubleAsmaParameterImpl();
 		
 		SessionMessageFactoryImpl smf = SessionMessageFactoryImpl.getInstance();
-		sessionMessageHandler = smf.createSessionMessageHandler("ADD_FIELD", inMock, outMock, cc, asma, traceMock);
+		sessionMessageHandler = smf.createSessionMessageHandler("ADD_FIELD", false, inMock, outMock, cc, asma, traceMock);
 		sessionMessageHandler.process();
+		
+		assertEquals(SessionMessageAddToPayloadImpl.class, sessionMessageHandler.getClass());
 		
 		String output = outputPayload.getOutputStream().toString();
 		assertEquals("<input><id/><dummy>hello!</dummy><sessionId>***SessionIdValue***</sessionId></input>", output);
 	}
 	
 	@Test
-	public void testProcessWithPayloadImpl() {
+	public void testProcessWithPayloadImpl() throws LookupException {
 		CommunicationChannel cc = new TestDoubleCommunicationChannelImpl("BC_Jason", "GetSessionKey_BasicAuth_R_SOAP");
 		AsmaParameter asma = new TestDoubleAsmaParameterImpl();
 		
 		SessionMessageFactoryImpl smf = SessionMessageFactoryImpl.getInstance();
-		sessionMessageHandler = smf.createSessionMessageHandler("SET_FIELD", inMock, outMock, cc, asma, traceMock);
+		sessionMessageHandler = smf.createSessionMessageHandler("SET_FIELD", false, inMock, outMock, cc, asma, traceMock);
 		sessionMessageHandler.process();
+		
+		assertEquals(SessionMessagePayloadImpl.class, sessionMessageHandler.getClass());
 		
 		String output = outputPayload.getOutputStream().toString();
 		assertEquals("<input><id>***SessionIdValue***</id><dummy>hello!</dummy></input>", output);
 	}
 	
 	@Test
-	public void testProcessWithSoapHeaderImpl() {
+	public void testProcessWithSoapHeaderImpl() throws LookupException {
 		CommunicationChannel cc = new TestDoubleCommunicationChannelImpl("BC_Jason", "GetSessionKey_BasicAuth_R_SOAP");
 		AsmaParameter asma = new TestDoubleAsmaParameterImpl();
 		
 		SessionMessageFactoryImpl smf = SessionMessageFactoryImpl.getInstance();
-		sessionMessageHandler = smf.createSessionMessageHandler("SOAP_HEADER", inMock, outMock, cc, asma, traceMock);
+		sessionMessageHandler = smf.createSessionMessageHandler("SOAP_HEADER", false, inMock, outMock, cc, asma, traceMock);
 		sessionMessageHandler.process();
-		
+
+		assertEquals(SessionMessageSoapHeaderImpl.class, sessionMessageHandler.getClass());
+
 		String output = outputPayload.getOutputStream().toString();
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:urn=\"urn:pi:session:key\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><soapenv:Header><urn:SessionHeader><urn:sessionId>***SessionIdValue***</urn:sessionId></urn:SessionHeader></soapenv:Header><soapenv:Body><input><id></id><dummy>hello!</dummy></input></soapenv:Body></soapenv:Envelope>", output);
-	}
-	
-	@Test
-	public void testProcessWithASMAImpl() {
-		CommunicationChannel cc = new TestDoubleCommunicationChannelImpl("BC_Jason", "GetSessionKey_BasicAuth_R_SOAP");
-		AsmaParameter asma = new TestDoubleAsmaParameterImpl();
-		
-		SessionMessageFactoryImpl smf = SessionMessageFactoryImpl.getInstance();
-		sessionMessageHandler = smf.createSessionMessageHandler("ASMA", inMock, outMock, cc, asma, traceMock);
-		sessionMessageHandler.process();
-		
-		String output = outputPayload.getOutputStream().toString();
-		assertEquals("<input><id></id><dummy>hello!</dummy></input>", output);
-		
-		assertEquals("***SessionIdValue***", asma.get());
 	}
 }
