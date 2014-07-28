@@ -39,34 +39,12 @@ public class LogoffHandlerImpl extends SessionMessage {
 	@Override
 	protected String getSessionKeyFromResponse(Payload response) {
 		return null;
-//		String sessionId = null;
-//		
-//		InputStream is = response.getContent();
-//		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-//		try {
-//			DocumentBuilder builder = docFactory.newDocumentBuilder();
-//			Document document = builder.parse(is);
-//			NodeList nodes = document.getElementsByTagName("key");
-//			Node node = nodes.item(0);
-//			
-//			if (node != null) {
-//				node = node.getFirstChild();
-//				if (node != null) {
-//					sessionId = node.getNodeValue();
-//				}
-//			}
-//			
-//		} catch (Exception e) {
-//			throw new SessionKeyResponseException(e.getMessage());
-//		}
-//		
-//		return sessionId;
 	}
 
 	@Override
 	protected Payload setRequestPayload() {
 		String sessionId = dynConfig.get("sessionId");
-		String loginXml = "<SessionKeyRequest xmlns=\"urn:pi:session:key\"><data>LOGOFF NOW FROM SESSION ID: " + sessionId + "!</data></SessionKeyRequest>";
+		String loginXml = "<SessionKeyRequest xmlns=\"urn:pi:session:key\"><data>LOGOFF NOW FROM SESSION ID: " + sessionId + "</data></SessionKeyRequest>";
 		InputStream is = new ByteArrayInputStream(loginXml.getBytes());
 		Payload payload = LookupService.getXmlPayload(is);
 		

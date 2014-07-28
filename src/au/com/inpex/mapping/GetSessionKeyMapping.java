@@ -27,11 +27,6 @@ public class GetSessionKeyMapping extends AbstractTransformation {
 		traceInfo("java mapping - processing start with MAPPING_TYPE = " + mappingType);
 		
 		try {
-			CommunicationChannel cc = new CommunicationChannelImpl(
-				inputHandler.getInputParameters().getString("BUSINESS_COMPONENT"),
-				inputHandler.getInputParameters().getString("BUSINESS_COMPONENT_CHANNEL")
-			);
-			
 			AsmaParameter dynConfig = new AsmaParameterImpl(inputHandler);
 			try {
 				logoff = dynConfig.get("logoff").equals("TRUE");
@@ -43,6 +38,11 @@ public class GetSessionKeyMapping extends AbstractTransformation {
 				dynConfig.set("logoff", "TRUE");
 			}
 		
+			CommunicationChannel cc = new CommunicationChannelImpl(
+				inputHandler.getInputParameters().getString("BUSINESS_COMPONENT"),
+				logoff? inputHandler.getInputParameters().getString("BUSINESS_COMPONENT_CHANNEL")+"_LOGOFF" : inputHandler.getInputParameters().getString("BUSINESS_COMPONENT_CHANNEL")
+			);
+			
 			SessionMessageFactoryImpl smf = SessionMessageFactoryImpl.getInstance();
 			SessionMessage sessionMessageHandler = smf.createSessionMessageHandler(
 				mappingType,
