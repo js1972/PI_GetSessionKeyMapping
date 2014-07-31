@@ -1,40 +1,24 @@
 PI_GetSessionKeyMapping
 =======================
 
-PI mapping to process a message with session key authentication.
+This eclipse project contains two PI java mappings as sample implementations of how to manage session key authentication with a web service. Each calls into the PI_SessionKeyLib project to do the work of retrieving the session id and then logging off (if requred).
 
 ### Overview
-The mapping program is implemented with class GetSessionKeyMapping. This creates the necessary dependencies and starts processing via the appropriate concrete SessionMessage class.
-An abstract factory is used to create the required implementation.
-The template pattern is used to allow users of this mapping to provide their own logic to specify:
- - the payload of the session key request message
- - how to extract the session key from the response message
- - how to build the final payload to the receiving system (e.g. add the session key to a field, header field, asma, etc).
+1. GetSessionKeyMapping. This mapping program reads a set of parameters from the operation mapping configuration, then builds a string to be used as the request payload to get a session id. A Factory Method is provided to pass this information into the PI_SessionKeyLib class library, which will derive the session id and set it as a Dynamic Configuration attribute on the message.
+2. LogoffSessionKeyMapping. This mapping is essentially the same as the above, except the logoff handler is retrieved instead to process a logoff command. If logoff is not explicitly required for the service then this mapping can be ignored.
 
-### Example implementations provided
- - SessionMessageIdentityImpl [simply copy the input payload to the output and log the determined session key - used for testing]
- - SessionMessagePayloadImpl [copy input payload to output and insert the session key into a specified field]
- - SessionMessageAddToPayloadImpl [copy input payload to output and add a new payload field for the session key]
- - SessionMessageSoapHeaderImpl [copy input payload to output and add a soap header field for the session key]
+### Parameters
+Mapping paramerers are configured to deternine the necessary values to pass the PI_SessionKeyLIb library:
+ - MAPPING_TYPE - this specifies how the session key is to be sent to the web service (inserted into an existing field; added as a new field; added as a soap header field; or simple set as a Dynamic Configuration attribute (which is done in all cases anyway). Allowed values are: ADD\_FIELD, SET\_FIELD, SOAP\_HEADER, LOGOFF. Anything else triggers the identity mapping function which does nothing to the payload.
+ - DC_NAMESPACES - this is the namespace for the Dynamic Configuration attribute that is created to hold the session id.
+ - DC_NAME - this is the name of the Dynamic Configuration attribute as mentioned above.
+ - BUSINESS\_COMPONENT, BUSINESS\_COMPONENT\_CHANNEL and BUSINESS\_COMPONENT\_CHANNEL\_LO - These are to define the Communication Channel to use for getting the session id and the one suffixed in "_LO" is for logoff (if req'd).
+ - FIELD\_NAME - This is to specify the payload element name that is to be filled with the session id when using SET\_FIELD. For ADD\_FIELD it is used to speicfy the payload element for which the new field is a sibling.
+ - NEW\_SESSIONID\_FIELD\_NAME - For the ADD_FIELD type this specifies the name of the new element. For the SOAP\_HEADER type it specifies the structure of the elemends to be created in the header based on "node/element". The substring before the forward-slash is the new xml node that is created in the soap header. The substring after the forward-slash is the name of the element that is created within the node.
+ - SESSION\_KEY\_RESPONSE\_FIELD - this is used to specify the field to search for in the response to the session id request to grab the actual session id.
 
 
-### Notes
- - The SOAP Header implementation requires the PI SOAP channel to be run in NOSOAP mode.
- -  All scenario's write the session key to an ASMA (or Dynamic Configuration entry). This can be used if you wish to make use of the session key in a channel (axis) to set a http cookie for example.
- - For a detailed walk-through of this solution on Evernote: https://www.evernote.com/shard/s4/sh/407418fc-0dd8-4b89-9f55-308d9820093c/f821979213af65d7dc7426fc2b708edd
-
-### Configuration in PI
-This mapping is loaded into PI as Imported Archive.
-The PI operation mapping references the java class inside the imported archive. A few mapping parameters are required at runtime as follows:
- - BUSINESS_COMPONENT [Mandatory - Business Component for looking up the PI Communication Channel]
- - BUSINESS\_COMPONENT\_CHANNEL [Mandatory - PI Communication Channel name]
- - MAPPING_TYPE [Mandatory - Used to determine which implementation to use - handled by the Abstract Factory]
- - DC\_NAMESPACE [Mandatory - Dynamic Configuration Namespace - used by the ASMA implementation]
- - DC\_NAME [Dynamic Configuration Name - used by the ASMA implementation].
- - FIELD\_NAME [This is used in building the request message to the receiving system. For the SET\_FIELD scenario it specifies the field which is set with the session key. For the ADD_FIELD scenario it is used to specify a field at the same node-level where you would like the new field added.]
- - NEW\_SESSIONID\_FIELD\_NAME [Specifies the new field name in the ADD\_FIELD scenario. It is placed at the same node level as the FIELD\_NAME element.]
- - SESSION\_KEY\_RESPONSE\_FIELD [Mandatory - This is the name of the field in the session key web service response that contains the actual session key.]
- - SOAP\_HEADER\_NODE [This is used in the SessionMessageSoapHeaderImpl to specify the field names in the soap header as follows: \<SOAP\_HEADER\_NODE\>\<FIELD\_NAME\>--sessionkey--\</FIELD\_NAME\>\</SOAP\_HEADER\_NODE\>]
+For a detailed walk-through of this solution on Evernote: https://www.evernote.com/shard/s4/sh/407418fc-0dd8-4b89-9f55-308d9820093c/f821979213af65d7dc7426fc2b708edd
 
 
 ### Contributions
