@@ -11,33 +11,25 @@ import com.sap.aii.mapping.api.TransformationOutput;
 import com.sap.aii.mapping.lookup.LookupException;
 
 
-public class GetSessionKeyMapping extends AbstractTransformation {
+public class LogoffSessionKeyMapping extends AbstractTransformation {
 	private static String mappingType = "";
 	
-	/**
-	 * PI mapping entry point.
-	 * Instantiate dependencies; then use an abstract factory to create
-	 * the appropriate SessionMessage class, based on the MAPPING_TYPE
-	 * PI mapping parameter.
-	 */
+	
+	@Override
 	public void transform(TransformationInput inputHandler, TransformationOutput outputHandler) throws StreamTransformationException {
 		mappingType = inputHandler.getInputParameters().getString("MAPPING_TYPE");
 		traceInfo("java mapping - processing start with MAPPING_TYPE = " + mappingType);
 		
 		try {
 			String businessComponentName = inputHandler.getInputParameters().getString("BUSINESS_COMPONENT");
-			String channelName = inputHandler.getInputParameters().getString("BUSINESS_COMPONENT_CHANNEL");
-			String sessionIdField = inputHandler.getInputParameters().getString("FIELD_NAME");
-			String newSessionIdField = inputHandler.getInputParameters().getString("NEW_SESSIONID_FIELD_NAME");
-			String sessionIdResponseField = inputHandler.getInputParameters().getString("SESSION_KEY_RESPONSE_FIELD");
+			String channelName = inputHandler.getInputParameters().getString("BUSINESS_COMPONENT_CHANNEL_LO");
 			String dcNamespace = inputHandler.getInputParameters().getString("DC_NAMESPACE");
 			String dcKey = inputHandler.getInputParameters().getString("DC_NAME");
 			
-			String loginXml = "<SessionKeyRequest xmlns=\"urn:pi:session:key\"><data>session key request from add-to-payload handler</data></SessionKeyRequest>";
+			String loginXml = "<SessionKeyRequest xmlns=\"urn:pi:session:key\"><data>LOGOFF => session key</data><sessionid></sessionid></SessionKeyRequest>";
 			
 			au.com.inpex.mapping.lib.SessionMessageFactoryImpl smf = au.com.inpex.mapping.lib.SessionMessageFactoryImpl.getInstance();
-			au.com.inpex.mapping.lib.SessionMessage sessionMessageHandler = smf.createSessionMessageHandler(
-				mappingType,
+			au.com.inpex.mapping.lib.SessionMessage sessionMessageHandler = smf.createLogoffHandler(
 				inputHandler,
 				outputHandler,
 				businessComponentName,
@@ -46,9 +38,7 @@ public class GetSessionKeyMapping extends AbstractTransformation {
 				dcKey,
 				getTrace(),
 				loginXml,
-				sessionIdField,
-				newSessionIdField,
-				sessionIdResponseField);
+				"sessionid");
 			
 			sessionMessageHandler.process();
 		}
@@ -74,5 +64,4 @@ public class GetSessionKeyMapping extends AbstractTransformation {
 		}
 		catch (Exception e) { }
 	}
-
 }
