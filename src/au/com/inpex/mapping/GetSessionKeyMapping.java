@@ -9,6 +9,7 @@ import com.sap.aii.mapping.api.StreamTransformationException;
 import com.sap.aii.mapping.api.TransformationInput;
 import com.sap.aii.mapping.api.TransformationOutput;
 import com.sap.aii.mapping.lookup.LookupException;
+import com.sap.tc.logging.Location;
 
 
 public class GetSessionKeyMapping extends AbstractTransformation {
@@ -22,7 +23,9 @@ public class GetSessionKeyMapping extends AbstractTransformation {
 	 */
 	public void transform(TransformationInput inputHandler, TransformationOutput outputHandler) throws StreamTransformationException {
 		mappingType = inputHandler.getInputParameters().getString("MAPPING_TYPE");
-		traceInfo("java mapping - processing start with MAPPING_TYPE = " + mappingType);
+		
+		Location location = Location.getLocation(this.getClass().getName());
+		location.debugT("java mapping - processing start with MAPPING_TYPE = " + mappingType);
 		
 		try {
 			String businessComponentName = inputHandler.getInputParameters().getString("BUSINESS_COMPONENT");
@@ -67,12 +70,4 @@ public class GetSessionKeyMapping extends AbstractTransformation {
 			throw new BuildMessagePayloadException("Error adding session key to payload: " + e.getMessage());
 		}
 	}
-
-	void traceInfo(String msg) {
-		try {
-			getTrace().addInfo(msg);
-		}
-		catch (Exception e) { }
-	}
-
 }
