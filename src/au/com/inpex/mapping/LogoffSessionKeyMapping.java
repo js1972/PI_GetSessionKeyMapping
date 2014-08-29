@@ -38,7 +38,8 @@ public class LogoffSessionKeyMapping extends AbstractTransformation {
 				dcKey,
 				getTrace(),
 				loginXml,
-				"sessionid");
+				"sessionid",
+				true);
 			
 			sessionMessageHandler.process();
 		}

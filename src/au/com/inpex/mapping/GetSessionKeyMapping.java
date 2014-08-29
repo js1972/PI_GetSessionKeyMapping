@@ -51,7 +51,8 @@ public class GetSessionKeyMapping extends AbstractTransformation {
 				loginXml,
 				sessionIdField,
 				newSessionIdField,
-				sessionIdResponseField);
+				sessionIdResponseField,
+				true);
 			
 			sessionMessageHandler.process();
 		}
